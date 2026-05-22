@@ -15,7 +15,11 @@ import {
 import { CustomCursor, BgOrbs } from "../components/Shared";
 import axios from "axios";
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:8000"
+    : "https://truth-shield-api-xp5o.onrender.com";
 
 // ─── Scan line ────────────────────────────────────────────────────────────────
 function ScanLine() {
