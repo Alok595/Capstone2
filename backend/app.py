@@ -19,17 +19,11 @@ app = FastAPI(
 # CORS
 # --------------------------------------------------
 
-origins = [
-    "https://capstone2-topaz-ten.vercel.app",
-    "https://capstone2-git-main-alok595s-projects.vercel.app",
-    "https://capstone2-931us0o2j-alok595s-projects.vercel.app",
-    "http://localhost:3000",
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
