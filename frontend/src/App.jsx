@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { Route, Routes } from "react-router-dom";
-import HowItWorks from "./pages/HowitWork";
+import HowitWorks from "./pages/HowitWork";
 import Analyzer from "./pages/Analyzer";
 
 const App = () => {
