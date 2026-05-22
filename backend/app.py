@@ -19,16 +19,11 @@ app = FastAPI(
 # CORS
 # --------------------------------------------------
 
-origins = [
-    "https://capstone2-topaz-ten.vercel.app",
-    "http://localhost:3000",  # local dev
-]
-
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,   
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
