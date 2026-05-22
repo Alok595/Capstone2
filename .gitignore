@@ -15,3 +15,7 @@ build/
 
 # OS
 .DS_Store
+
+models/fake_news/
+myenv/
+frontend/node_modules/

@@ -5,6 +5,7 @@ import re
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
+
 # --------------------------------------------------
 # FastAPI App
 # --------------------------------------------------
@@ -44,13 +45,14 @@ with open("vectorizer.pkl", "rb") as f:
 #       tokenizer.json
 #       tokenizer_config.json
 # --------------------------------------------------
-FAKE_NEWS_PATH = "models/fake_news"
+# FAKE_NEWS_PATH = "models/fake_news"   this is for loaclly
+
+FAKE_NEWS_PATH = "Alok595/fake_news"
 
 news_tokenizer = AutoTokenizer.from_pretrained(FAKE_NEWS_PATH)
-news_model = AutoModelForSequenceClassification.from_pretrained(
-    FAKE_NEWS_PATH
-)
+news_model = AutoModelForSequenceClassification.from_pretrained(FAKE_NEWS_PATH)
 news_model.eval()
+
 
 # --------------------------------------------------
 # Utility Functions
