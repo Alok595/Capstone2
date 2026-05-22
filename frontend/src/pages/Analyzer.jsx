@@ -12,7 +12,7 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
-import { CustomCursor, BgOrbs } from "../components/shared";
+import { CustomCursor, BgOrbs } from "../components/Shared";
 import axios from "axios";
 
 const API_BASE = "http://127.0.0.1:8000";
