@@ -40,7 +40,7 @@ app.add_middleware(
 with open("models/sms_model/model.pkl", "rb") as f:
     sms_model = pickle.load(f)
 
-with open("vectorizer.pkl", "rb") as f:
+with open("models/sms_model/vectorizer.pkl", "rb") as f:
     sms_vectorizer = pickle.load(f)
 
 # --------------------------------------------------
