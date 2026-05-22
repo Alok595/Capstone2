@@ -190,7 +190,7 @@ const PIPELINE = [
 ];
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
-export default function HowItWorks() {
+export default function HowitWorks() {
   return (
     <div className="font-['DM_Sans',sans-serif]">
       <CustomCursor />
