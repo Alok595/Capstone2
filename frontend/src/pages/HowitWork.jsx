@@ -14,8 +14,7 @@ import {
   Layers,
   ChevronRight,
 } from "lucide-react";
-import { CustomCursor, BgOrbs } from "../components/shared";
-
+import { CustomCursor, BgOrbs } from "../components/Shared";
 // ─── Detection method data ────────────────────────────────────────────────────
 const METHODS = [
   {

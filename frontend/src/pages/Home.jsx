@@ -11,7 +11,7 @@ import {
   ChevronRight,
   Sparkles,
 } from "lucide-react";
-import { BgOrbs, CustomCursor } from "../components/shared";
+import { CustomCursor, BgOrbs } from "../components/Shared";
 
 const STATS = [
   { label: "Analyses Run", value: "0+", icon: TrendingUp },
