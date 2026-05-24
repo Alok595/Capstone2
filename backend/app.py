@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pickle
 import re
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+# import torch
+# from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 
 # --------------------------------------------------
@@ -52,9 +52,9 @@ with open("models/sms_model/vectorizer.pkl", "rb") as f:
 
 FAKE_NEWS_PATH = "Alok595/fake_news"
 
-news_tokenizer = AutoTokenizer.from_pretrained(FAKE_NEWS_PATH)
-news_model = AutoModelForSequenceClassification.from_pretrained(FAKE_NEWS_PATH)
-news_model.eval()
+# news_tokenizer = AutoTokenizer.from_pretrained(FAKE_NEWS_PATH)
+# news_model = AutoModelForSequenceClassification.from_pretrained(FAKE_NEWS_PATH)
+# news_model.eval()
 
 
 # --------------------------------------------------
@@ -140,30 +140,63 @@ def analyze_text(text: str):
 # Fake News Detection Endpoint
 # POST /analyze-news?text=Breaking news...
 # --------------------------------------------------
+# @app.post("/analyze-news")
+# def analyze_news(text: str):
+#     inputs = news_tokenizer(
+#         text,
+#         return_tensors="pt",
+#         truncation=True,
+#         padding=True,
+#         max_length=512
+#     )
+
+#     with torch.no_grad():
+#         outputs = news_model(**inputs)
+#         probabilities = torch.softmax(outputs.logits, dim=1)
+
+#     fake_prob = float(probabilities[0][1].item())
+#     confidence = round(fake_prob * 100, 2)
+
+#     result = "FAKE" if fake_prob > 0.5 else "REAL"
+
+#     risk_level = (
+#         "Low" if confidence < 30
+#         else "Medium" if confidence < 60
+#         else "High"
+#     )
+
+#     return {
+#         "input_text": text,
+#         "result": result,
+#         "confidence": confidence,
+#         "risk_score": int(confidence),
+#         "risk_level": risk_level,
+#         "red_flags": []
+#     }
+
+
+import httpx
+import os
+
+HF_TOKEN = os.getenv("HF_TOKEN")
+HF_API_URL = "https://api-inference.huggingface.co/models/Alok595/fake_news"
+
 @app.post("/analyze-news")
 def analyze_news(text: str):
-    inputs = news_tokenizer(
-        text,
-        return_tensors="pt",
-        truncation=True,
-        padding=True,
-        max_length=512
+    response = httpx.post(
+        HF_API_URL,
+        headers={"Authorization": f"Bearer {HF_TOKEN}"},
+        json={"inputs": text}
     )
+    data = response.json()
 
-    with torch.no_grad():
-        outputs = news_model(**inputs)
-        probabilities = torch.softmax(outputs.logits, dim=1)
-
-    fake_prob = float(probabilities[0][1].item())
+    # HF returns: [[{"label": "FAKE", "score": 0.95}, {"label": "REAL", "score": 0.05}]]
+    scores = {item["label"]: item["score"] for item in data[0]}
+    fake_prob = scores.get("FAKE", scores.get("LABEL_1", 0.0))
     confidence = round(fake_prob * 100, 2)
 
     result = "FAKE" if fake_prob > 0.5 else "REAL"
-
-    risk_level = (
-        "Low" if confidence < 30
-        else "Medium" if confidence < 60
-        else "High"
-    )
+    risk_level = "Low" if confidence < 30 else "Medium" if confidence < 60 else "High"
 
     return {
         "input_text": text,

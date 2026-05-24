@@ -1,9 +1,9 @@
 fastapi
 uvicorn
 scikit-learn
-torch
-transformers
-sentencepiece
+# torch
+# transformers
+# sentencepiece
 safetensors
 python-multipart
 numpy
