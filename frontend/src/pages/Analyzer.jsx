@@ -19,7 +19,7 @@ const API_BASE =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1"
     ? "http://127.0.0.1:8000"
-    : "https://truth-shield-api-xp5o.onrender.com";
+    : "https://truth-shield-apii.onrender.com";
 
 // ─── Scan line ────────────────────────────────────────────────────────────────
 function ScanLine() {
