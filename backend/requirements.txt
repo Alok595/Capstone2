@@ -8,3 +8,4 @@ safetensors
 python-multipart
 numpy
 pandas
+httpx
