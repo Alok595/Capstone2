@@ -54,10 +54,10 @@ sample_vec = vectorizer.transform(sample)
 prediction = model.predict(sample_vec)
 
 print("Prediction:", "SCAM" if prediction[0] == 1 else "SAFE")
-import pickle
+# import pickle
 
-# Save model
-pickle.dump(model, open("model.pkl", "wb"))
+# # Save model
+# pickle.dump(model, open("model.pkl", "wb"))
 
-# Save vectorizer
-pickle.dump(vectorizer, open("vectorizer.pkl", "wb"))
+# # Save vectorizer
+# pickle.dump(vectorizer, open("vectorizer.pkl", "wb"))

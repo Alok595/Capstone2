@@ -2,8 +2,6 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageSquare,
-  Link2,
-  Image,
   Newspaper,
   Shield,
   AlertTriangle,
@@ -179,66 +177,14 @@ function TabBtn({ icon: Icon, label, active, onClick }) {
   );
 }
 
-// ─── Demo data (link / image tabs only) ──────────────────────────────────────
-const DEMO = {
-  link: {
-    verdict: "SUSPICIOUS",
-    confidence: 71,
-    summary:
-      "This URL exhibits several risk indicators: recently registered domain (12 days old), no HTTPS, misleading subdomain mimicking a trusted news brand, and metadata inconsistencies.",
-    signals: [
-      { label: "Domain Age", value: "Registered 12 days ago", ok: false },
-      { label: "SSL Certificate", value: "No HTTPS detected", ok: false },
-      { label: "Brand Spoofing", value: "Mimics known news domain", ok: false },
-      {
-        label: "Content Analysis",
-        value: "Partially accurate claims",
-        ok: true,
-      },
-      { label: "Blacklist Check", value: "Not on known blocklists", ok: true },
-      { label: "Redirect Chain", value: "3 suspicious redirects", ok: false },
-    ],
-  },
-  image: {
-    verdict: "FAKE",
-    confidence: 89,
-    summary:
-      "Deepfake analysis detected AI-generated facial artifacts around the jaw and hairline regions. GAN fingerprint analysis confirms synthetic origin. No authentic camera EXIF data found.",
-    signals: [
-      {
-        label: "Facial Artifacts",
-        value: "GAN artifacts at jaw/hairline",
-        ok: false,
-      },
-      { label: "EXIF Metadata", value: "No camera data present", ok: false },
-      { label: "GAN Fingerprint", value: "AI-generation confirmed", ok: false },
-      { label: "Pixel Analysis", value: "Blending seams detected", ok: false },
-      { label: "Reverse Image", value: "No originals found", ok: false },
-      { label: "Compression", value: "Unusual noise pattern", ok: false },
-    ],
-  },
-};
-
 const PLACEHOLDERS = {
   message:
     "Paste a suspicious WhatsApp message, SMS, or social media post here…",
-  link: "https://suspicious-news-site.com/breaking-story-2024",
-  image: "https://i.imgur.com/example-image.jpg  —  or paste an image URL",
   news: "Paste a news headline or article excerpt to verify its authenticity…",
-};
-
-const DEMO_TEXT = {
-  message:
-    "BREAKING: Government secretly adding mind-control chemicals to tap water confirmed by whistleblower! Share before they delete this! Scientists are TERRIFIED they don't want you to know this!!!",
-  link: "https://cnn-news-updates.verifytoday.biz/breaking/secret-deal",
-  image: "https://deepfake-example.net/generated/politician-scandal.jpg",
-  news: "Scientists confirm that drinking bleach cures all known diseases. The government has been hiding this cure for decades to protect Big Pharma profits. Share this before it gets deleted!",
 };
 
 const TABS = [
   { id: "message", label: "SMS / Message", icon: MessageSquare },
-  { id: "link", label: "URL / Link", icon: Link2 },
-  { id: "image", label: "Image", icon: Image },
   { id: "news", label: "News Article", icon: Newspaper },
 ];
 
@@ -246,10 +192,7 @@ const TABS = [
 function mapApiResponse(data, tabType) {
   const { result, confidence, risk_score, risk_level, red_flags } = data;
 
-  const isScam = result === "SCAM";
-  const isFake = result === "FAKE";
-  const isBad = isScam || isFake;
-
+  const isBad = result === "SCAM" || result === "FAKE";
   const verdict = isBad ? "FAKE" : "REAL";
   const displayConf = risk_score ?? Math.round(confidence);
 
@@ -267,34 +210,20 @@ function mapApiResponse(data, tabType) {
   }
 
   const signals = [
-    {
-      label: "Model Verdict",
-      value: result,
-      ok: !isBad,
-    },
+    { label: "Model Verdict", value: result, ok: !isBad },
     {
       label: "Risk Level",
       value: `${risk_level} (${displayConf}/100)`,
       ok: risk_level === "Low",
     },
-    {
-      label: "Confidence",
-      value: `${confidence}%`,
-      ok: !isBad,
-    },
+    { label: "Confidence", value: `${confidence}%`, ok: !isBad },
     ...(red_flags?.length
       ? red_flags.slice(0, 3).map((flag) => ({
           label: "Red Flag",
           value: flag,
           ok: false,
         }))
-      : [
-          {
-            label: "Red Flags",
-            value: "None detected",
-            ok: true,
-          },
-        ]),
+      : [{ label: "Red Flags", value: "None detected", ok: true }]),
   ];
 
   return { verdict, confidence: displayConf, summary, signals };
@@ -321,21 +250,15 @@ export default function Analyzer() {
 
     try {
       if (activeTab === "message") {
-        // ── SMS Scam Detection ──────────────────────────────────────────────
         const { data } = await axios.post(`${API_BASE}/analyze-text`, null, {
           params: { text: input },
         });
         setResult(mapApiResponse(data, "message"));
-      } else if (activeTab === "news") {
-        // ── Fake News Detection ─────────────────────────────────────────────
+      } else {
         const { data } = await axios.post(`${API_BASE}/analyze-news`, null, {
           params: { text: input },
         });
         setResult(mapApiResponse(data, "news"));
-      } else {
-        // ── Link / Image → demo fallback ────────────────────────────────────
-        await new Promise((r) => setTimeout(r, 2200));
-        setResult(DEMO[activeTab]);
       }
     } catch (err) {
       setResult({
@@ -352,12 +275,6 @@ export default function Analyzer() {
     }
   };
 
-  const handleDemo = () => {
-    setInput(DEMO_TEXT[activeTab]);
-    setResult(null);
-  };
-
-  // Loading step labels per tab
   const loadingSteps = {
     message: [
       "Normalizing text input",
@@ -370,18 +287,6 @@ export default function Analyzer() {
       "Running transformer model",
       "Evaluating misinformation signals",
       "Generating confidence score",
-    ],
-    link: [
-      "Parsing URL structure",
-      "Checking domain age & SSL",
-      "Cross-referencing blacklists",
-      "Scoring credibility signals",
-    ],
-    image: [
-      "Parsing content structure",
-      "Running GAN fingerprint scan",
-      "Checking EXIF metadata",
-      "Scoring deepfake probability",
     ],
   };
 
@@ -416,8 +321,7 @@ export default function Analyzer() {
           transition={{ delay: 0.2 }}
           className="text-slate-400 text-lg max-w-xl mx-auto"
         >
-          Paste a message, link, image URL, or news article and let our AI
-          verdict it in seconds.
+          Paste a message or news article and let our AI verdict it in seconds.
         </motion.p>
       </section>
 
@@ -443,7 +347,7 @@ export default function Analyzer() {
               ))}
             </div>
 
-            {/* Input — textarea for text tabs, input for URL tabs */}
+            {/* Input */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
@@ -452,28 +356,19 @@ export default function Analyzer() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
               >
-                {activeTab === "message" || activeTab === "news" ? (
-                  <textarea
-                    ref={activeTab === "message" ? textareaRef : null}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder={PLACEHOLDERS[activeTab]}
-                    rows={5}
-                    className="w-full bg-black/30 border border-white/10 focus:border-cyan-500/50 rounded-2xl px-5 py-4 text-slate-200 text-sm placeholder-slate-600 resize-none outline-none transition-all duration-300 focus:shadow-[0_0_20px_rgba(0,200,255,0.1)]"
-                  />
-                ) : (
-                  <input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder={PLACEHOLDERS[activeTab]}
-                    className="w-full bg-black/30 border border-white/10 focus:border-cyan-500/50 rounded-2xl px-5 py-4 text-slate-200 text-sm placeholder-slate-600 outline-none transition-all duration-300 focus:shadow-[0_0_20px_rgba(0,200,255,0.1)]"
-                  />
-                )}
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={PLACEHOLDERS[activeTab]}
+                  rows={5}
+                  className="w-full bg-black/30 border border-white/10 focus:border-cyan-500/50 rounded-2xl px-5 py-4 text-slate-200 text-sm placeholder-slate-600 resize-none outline-none transition-all duration-300 focus:shadow-[0_0_20px_rgba(0,200,255,0.1)]"
+                />
               </motion.div>
             </AnimatePresence>
 
-            {/* Buttons */}
-            <div className="flex items-center gap-3 mt-4">
+            {/* Analyze button */}
+            <div className="mt-4">
               <motion.button
                 onClick={handleAnalyze}
                 disabled={!input.trim() || loading}
@@ -484,7 +379,7 @@ export default function Analyzer() {
                 }
                 whileTap={input.trim() && !loading ? { scale: 0.97 } : {}}
                 data-hover
-                className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 ${
+                className={`w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 ${
                   input.trim() && !loading
                     ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_25px_rgba(0,200,255,0.25)]"
                     : "bg-white/5 text-slate-600 cursor-not-allowed"
@@ -500,15 +395,6 @@ export default function Analyzer() {
                     <Shield size={16} /> Analyze Now
                   </>
                 )}
-              </motion.button>
-              <motion.button
-                onClick={handleDemo}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                data-hover
-                className="px-5 py-3.5 rounded-2xl border border-white/15 text-slate-400 hover:text-slate-200 hover:border-white/30 text-sm font-semibold transition-all"
-              >
-                Use Demo
               </motion.button>
             </div>
 
@@ -572,7 +458,7 @@ export default function Analyzer() {
           <p className="text-slate-600 text-xs text-center uppercase tracking-widest mb-6">
             Tips for best results
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               {
                 icon: "💬",
@@ -581,14 +467,6 @@ export default function Analyzer() {
               {
                 icon: "📰",
                 tip: "For news, paste the headline plus a few sentences for better context.",
-              },
-              {
-                icon: "🔗",
-                tip: "Include the complete URL with https:// for proper domain analysis.",
-              },
-              {
-                icon: "🖼",
-                tip: "Use direct image URLs (not social media share links) for forensic analysis.",
               },
             ].map((t, i) => (
               <motion.div
